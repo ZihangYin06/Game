@@ -1,9 +1,8 @@
-#include "LIFT.hpp"
+#include "Chassis.hpp"
 
-extern "C" void StartLIFTTask(void *argument)
+extern "C" void StartChassisTask(void *argument)
 {
     uint32_t wake = osKernelGetTickCount();
-    LIFT_Init();
 
     for (;;)
     {

@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "bsp_cdc.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -261,6 +261,8 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  /* 先把数据搬进 bsp_cdc 的接收环形缓冲，再重新挂载缓冲等待下一帧 */
+  BSP_CDC_RxCallback(Buf, *Len);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

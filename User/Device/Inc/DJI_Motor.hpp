@@ -4,10 +4,11 @@
  * @brief   大疆电机（GM6020 / M3508）驱动：CAN 反馈解析 + 电流指令发送
  *
  * 发送模型说明（重要）：
- *   同一型号电机的电流指令共用一帧 CAN（8 字节，每台电机占 2 字节大端），
- *   存放在 .cpp 内的全局发送缓存中。SetCurrent() 只是把当前对象的指令
- *   写入缓存中 id 对应的槽位，StartMotor() 把整帧缓存发出——
- *   由哪个电机对象调用二者效果相同，缓存按 id 索引而非按对象区分。
+ *   同一型号电机在一条总线上共用一帧电流 CAN（8 字节，每台电机占
+ *   2 字节大端）。CAN1 / CAN2 各有一份独立的发送缓存，按 (总线, id)
+ *   定位槽位：SetCurrent() 把当前对象的指令写入指定总线缓存的对应
+ *   槽位，StartMotor() 把该总线整帧缓存发出——由哪个电机对象调用
+ *   二者效果相同，缓存按总线 + id 索引而非按对象区分。
  ******************************************************************************
  */
 #ifndef DJI_MOTOR_HPP_
@@ -45,12 +46,16 @@ struct DJIMotor
     void GetInfo(uint8_t *rx_buff);
 
     /**
-     * @brief  将电流指令写入对应型号发送缓存中 id 所在的槽位
+     * @brief  将电流指令写入指定总线的发送缓存中 id 所在的槽位
      * @param  model: 电机型号
-     * @param  id: 总线上电机编号 1~4（超出范围直接忽略，防止越界）
+     * @param  phcan: 该电机所在总线（&hcan1 / &hcan2，见 define.h 的
+     *         xx_LIFT_CAN 宏），决定写入哪份总线缓存
+     * @param  id: 该总线上的电机编号 1~4（超出范围直接忽略，防止越界）
      * @param  current: 电流指令（M3508 范围 -16384~16384）
+     * @note   两条总线各一份独立缓存，互不影响；同一总线同 id 的
+     *         多次写入会互相覆盖，以最后一次为准
      */
-    void SetCurrent(MotorModel model, uint8_t id, int16_t current);
+    void SetCurrent(MotorModel model, CAN_HandleTypeDef *phcan, uint8_t id, int16_t current);
 
     /**
      * @brief  将对应型号的整帧电流缓存作为一帧 CAN 发送

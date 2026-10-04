@@ -39,10 +39,10 @@ bool Chassis_High(void)
     LB_Angle_PID.AngleCalc(LB_Speed_PID, 0, LB_Motor.accumulate_angle, LB_Motor.speed);
     RF_Angle_PID.AngleCalc(RF_Speed_PID, 0, RF_Motor.accumulate_angle, RF_Motor.speed);
     RB_Angle_PID.AngleCalc(RB_Speed_PID, 0, RB_Motor.accumulate_angle, RB_Motor.speed);
-    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_ID, (int16_t)LF_Speed_PID.GetOutput());
-    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_ID, (int16_t)LB_Speed_PID.GetOutput());
-    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_ID, (int16_t)RF_Speed_PID.GetOutput());
-    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_ID, (int16_t)RB_Speed_PID.GetOutput());
+    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_CAN, LF_LIFT_ID, (int16_t)LF_Speed_PID.GetOutput());
+    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_CAN, LB_LIFT_ID, (int16_t)LB_Speed_PID.GetOutput());
+    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_CAN, RF_LIFT_ID, (int16_t)RF_Speed_PID.GetOutput());
+    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_CAN, RB_LIFT_ID, (int16_t)RB_Speed_PID.GetOutput());
     StartMotor();
     if (LF_Motor.current < 100 && LB_Motor.current < 100 && RF_Motor.current < 100 && RB_Motor.current < 100)
     {
@@ -61,10 +61,10 @@ bool Chassis_Low(void)
     LB_Angle_PID.AngleCalc(LB_Speed_PID, 0, LB_Motor.accumulate_angle, LB_Motor.speed);
     RF_Angle_PID.AngleCalc(RF_Speed_PID, 0, RF_Motor.accumulate_angle, RF_Motor.speed);
     RB_Angle_PID.AngleCalc(RB_Speed_PID, 0, RB_Motor.accumulate_angle, RB_Motor.speed);
-    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_ID, (int16_t)LF_Speed_PID.GetOutput());
-    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_ID, (int16_t)LB_Speed_PID.GetOutput());
-    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_ID, (int16_t)RF_Speed_PID.GetOutput());
-    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_ID, (int16_t)RB_Speed_PID.GetOutput());
+    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_CAN, LF_LIFT_ID, (int16_t)LF_Speed_PID.GetOutput());
+    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_CAN, LB_LIFT_ID, (int16_t)LB_Speed_PID.GetOutput());
+    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_CAN, RF_LIFT_ID, (int16_t)RF_Speed_PID.GetOutput());
+    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_CAN, RB_LIFT_ID, (int16_t)RB_Speed_PID.GetOutput());
     StartMotor();
     if (LF_Motor.current < 100 && LB_Motor.current < 100 && RF_Motor.current < 100 && RB_Motor.current < 100)
     {
@@ -77,9 +77,9 @@ bool Chassis_Low(void)
 
 void LIFT_Standby(void)
 {
-    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_ID, 0);
-    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_ID, 0);
-    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_ID, 0);
-    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_ID, 0);
+    LF_Motor.SetCurrent(MotorModel::M3508, LF_LIFT_CAN, LF_LIFT_ID, 0);
+    LB_Motor.SetCurrent(MotorModel::M3508, LB_LIFT_CAN, LB_LIFT_ID, 0);
+    RF_Motor.SetCurrent(MotorModel::M3508, RF_LIFT_CAN, RF_LIFT_ID, 0);
+    RB_Motor.SetCurrent(MotorModel::M3508, RB_LIFT_CAN, RB_LIFT_ID, 0);
     StartMotor();
 }

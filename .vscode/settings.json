@@ -3,7 +3,8 @@
         "*.h": "c"
     },
     "editor.formatOnSave": true,
-    "explorer.copyPathSeparator": "\\",
+    "explorer.copyPathSeparator": "/",
+    "explorer.copyRelativePathSeparator": "/",
     "[c]": {
         "editor.formatOnSave": false,
     },

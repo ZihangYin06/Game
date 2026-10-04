@@ -24,6 +24,9 @@ set(CMAKE_PROJECT_NAME Game)
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
+# Project-local paths should use forward slashes in CMake source lists.
+# Avoid rewriting CMAKE_SOURCE_DIR/CMAKE_CURRENT_SOURCE_DIR, which are absolute paths.
+
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
@@ -47,6 +50,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     User/Bsp/Src/bsp_can.c
     User/Bsp/Src/bsp_dr16.c
+    User/Bsp/Src/bsp_cdc.c
     User/Device/Src/DJI_Motor.cpp
     User/Device/Src/Relay.cpp
     User/Device/Src/Servo.cpp
@@ -54,6 +58,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Task/Src/CanReceiveTask.cpp
     User/Task/Src/LIFT_Task.cpp
     User/App/Src/LIFT.cpp
+    User/App/Src/Chassis.cpp
 
 )
 

@@ -51,7 +51,14 @@
 osThreadId_t LIFTTaskHandle;
 const osThreadAttr_t LIFTTask_attributes = {
   .name = "LIFTTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ChassisTask */
+osThreadId_t ChassisTaskHandle;
+const osThreadAttr_t ChassisTask_attributes = {
+  .name = "ChassisTask",
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -61,6 +68,7 @@ const osThreadAttr_t LIFTTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartLIFTTask(void *argument);
+void StartChassisTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -95,6 +103,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of LIFTTask */
   LIFTTaskHandle = osThreadNew(StartLIFTTask, NULL, &LIFTTask_attributes);
 
+  /* creation of ChassisTask */
+  ChassisTaskHandle = osThreadNew(StartChassisTask, NULL, &ChassisTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -123,6 +134,24 @@ __weak void StartLIFTTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END StartLIFTTask */
+}
+
+/* USER CODE BEGIN Header_StartChassisTask */
+/**
+* @brief Function implementing the ChassisTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartChassisTask */
+__weak void StartChassisTask(void *argument)
+{
+  /* USER CODE BEGIN StartChassisTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartChassisTask */
 }
 
 /* Private application code --------------------------------------------------*/
