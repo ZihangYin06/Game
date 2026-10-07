@@ -12,6 +12,13 @@
 /* 每帧最多 4 台电机，每台占 2 字节（大端）：[id1_H,id1_L,id2_H,id2_L,...] */
 static const uint8_t MOTOR_NUM_PER_FRAME = 4U;
 
+/* DJI 电机协议帧 ID（原 define.h 并入于此）：
+ * 指令帧按型号固定；反馈帧 = 各型号 RX 基址 + 电机编号 */
+static const uint16_t GM6020_TX_ID = 0x1FEU; /* GM6020 指令帧 */
+static const uint16_t M3508_TX_ID  = 0x200U; /* M3508 电流指令帧 */
+static const uint16_t GM6020_RX_ID = 0x204U; /* GM6020 反馈帧基址 */
+static const uint16_t M3508_RX_ID  = 0x200U; /* M3508 反馈帧基址 */
+
 /*
  * 电流指令发送缓存：每条总线、每个型号各一份 8 字节帧
  * （0x200 / 0x1FF 各带 4 台；当前布局每总线只有 ID 1~4，仅用 0x200。
@@ -38,11 +45,16 @@ static uint8_t BusIndexOf(CAN_HandleTypeDef *phcan)
     return BUS_NUM;
 }
 
-// 全局电机对象定义
-DJIMotor LF_Motor;
-DJIMotor LB_Motor;
-DJIMotor RF_Motor;
-DJIMotor RB_Motor;
+/*
+ * 全局电机对象定义（身份登记表）：
+ * 每台电机的 型号 / 总线 / 编号 在此绑定一次，全工程其余地方调用
+ * 控制 / 发送 / 反馈接口时不再传身份参数。
+ * 新增电机：仿照下行直接登记（型号, 总线, 编号 1~4）。
+ */
+MotorUnit LF_Motor(MotorModel::M3508, &hcan2, 1U); /* 左前提升 */
+MotorUnit LB_Motor(MotorModel::M3508, &hcan2, 2U); /* 左后提升 */
+MotorUnit RF_Motor(MotorModel::M3508, &hcan2, 3U); /* 右前提升 */
+MotorUnit RB_Motor(MotorModel::M3508, &hcan2, 4U); /* 右后提升 */
 
 void DJIMotor::GetInfo(uint8_t *rx_buff)
 {
@@ -66,29 +78,29 @@ void DJIMotor::GetInfo(uint8_t *rx_buff)
     accumulate_angle = (float)(circle_number * 8192 + encoder) / 8192.0f * 360.0f;
 }
 
-void DJIMotor::SetCurrent(MotorModel model, CAN_HandleTypeDef *phcan, uint8_t id, int16_t cmd_current)
+void DJIMotor::SetCurrent(int16_t current)
 {
     uint8_t bus = BusIndexOf(phcan);
     if (bus >= BUS_NUM || id < 1U || id > MOTOR_NUM_PER_FRAME)
     {
-        return; /* 未知总线或 id 超出一帧容量，直接忽略 */
+        return; /* 身份非法（未知总线 / id 超出一帧容量），直接忽略 */
     }
 
     uint8_t index = (id - 1U) * 2U;
 
     if (model == MotorModel::GM6020)
     {
-        GM6020_Current[bus][index] = cmd_current >> 8;
-        GM6020_Current[bus][index + 1] = cmd_current & 0xFF;
+        GM6020_Current[bus][index] = current >> 8;
+        GM6020_Current[bus][index + 1] = current & 0xFF;
     }
     else if (model == MotorModel::M3508)
     {
-        M3508_Current[bus][index] = cmd_current >> 8;
-        M3508_Current[bus][index + 1] = cmd_current & 0xFF;
+        M3508_Current[bus][index] = current >> 8;
+        M3508_Current[bus][index + 1] = current & 0xFF;
     }
 }
 
-void DJIMotor::StartMotor(MotorModel model, CAN_HandleTypeDef *phcan)
+void DJIMotor::StartMotor(void)
 {
     uint8_t bus = BusIndexOf(phcan);
     if (bus >= BUS_NUM)
@@ -96,7 +108,7 @@ void DJIMotor::StartMotor(MotorModel model, CAN_HandleTypeDef *phcan)
         return; /* 未知总线，忽略 */
     }
 
-    /* 只发送 phcan 自己的总线缓存，两条总线互不干扰 */
+    /* 只发送本电机所属总线的缓存，两条总线互不干扰 */
     if (model == MotorModel::GM6020)
     {
         CANSend(phcan, GM6020_TX_ID, GM6020_Current[bus], 8);
@@ -105,4 +117,13 @@ void DJIMotor::StartMotor(MotorModel model, CAN_HandleTypeDef *phcan)
     {
         CANSend(phcan, M3508_TX_ID, M3508_Current[bus], 8);
     }
+}
+
+uint16_t DJIMotor::RxId(void) const
+{
+    if (id < 1U || id > MOTOR_NUM_PER_FRAME)
+    {
+        return 0U;
+    }
+    return (uint16_t)((model == MotorModel::GM6020 ? GM6020_RX_ID : M3508_RX_ID) + id);
 }

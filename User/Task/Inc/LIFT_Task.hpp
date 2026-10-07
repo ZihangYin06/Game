@@ -3,8 +3,6 @@
 
 #include "Relay.hpp"
 #include "DJI_Motor.hpp"
-#include "PID.hpp"
-#include "define.h"
 
 void LIFT_Init(void);
 bool Chassis_High(void);
